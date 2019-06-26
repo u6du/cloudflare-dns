@@ -3,4 +3,7 @@
 * init.coffee 导入域名
 * txt.coffee 更新域名的txt
 
-[点此参与文档翻译](https://gitlocalize.com/repo/2517)
+## 相关链接
+
+* [参与文档翻译](https://gitlocalize.com/repo/2517)
+* [项目闲聊室](https://gitter.im/u6du/community)
