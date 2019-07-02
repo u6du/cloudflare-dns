@@ -4,7 +4,6 @@ package main
 
 import (
 	"encoding/binary"
-	"io/ioutil"
 	"net"
 	"sort"
 	"strings"
@@ -20,23 +19,21 @@ import (
 	"golang.org/x/crypto/ed25519"
 )
 
-
 const TimeBit = 4
 
 // 建议放22个ipv4，加上80个字节的签名，base85编码之后正好是250字节，不超过dns txt记录的限制
 func ipLiSign(bit int) func([]*net.UDPAddr, *ed25519.PrivateKey) string {
 
-	var dump func (addr *net.UDPAddr) net.IP
-	if bit == 4{
-		dump = func (addr *net.UDPAddr) net.IP{
+	var dump func(addr *net.UDPAddr) net.IP
+	if bit == 4 {
+		dump = func(addr *net.UDPAddr) net.IP {
 			return addr.IP.To4()
 		}
-	} else{
-		dump = func (addr *net.UDPAddr) net.IP{
+	} else {
+		dump = func(addr *net.UDPAddr) net.IP {
 			return addr.IP
 		}
 	}
-
 
 	return func(li []*net.UDPAddr, private *ed25519.PrivateKey) string {
 		buf := make([]byte, ed25519.SignatureSize+TimeBit+len(li)*(bit+2))
@@ -91,8 +88,11 @@ var IpLiSign = map[uint8]func([]*net.UDPAddr, *ed25519.PrivateKey) string{
 }
 
 func main() {
-	privateByte, err := ioutil.ReadFile("private/6du.dns.private")
-	ex.Panic(err)
+	filename := "cloudflare/6du.sign.private"
+	privateByte := config.File.Byte(filename, func() []byte {
+		panic(errors.New(config.File.Path(filename)+" no exist"))
+		return nil
+	})
 	private := ed25519.NewKeyFromSeed(privateByte)
 
 	TxtSet(&private, 6, []string{
@@ -103,7 +103,6 @@ func main() {
 		"[2600:1f1c:626:9201:2ecb:6a9b:60b:a31b]:8321",
 		"[2600:1f1c:626:9201:2ecb:6a9b:60b:a31b]:8321",
 		"[ab1d:1f1c:626:9201:2ecb:1111:2222:3333]:39999",
-
 	})
 
 	TxtSet(&private, 4, []string{
@@ -133,10 +132,10 @@ func main() {
 }
 
 func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
-	filename:="cloudflare"
-	emailKey := config.File.Li(filename,[]string{})
+	filename := "cloudflare"
+	emailKey := config.File.Li(filename, []string{})
 
-	if len(emailKey)!=2{
+	if len(emailKey) != 2 {
 		panic(errors.New(config.File.Path(filename+".li") + " is empty , please write email and key one a line"))
 	}
 
@@ -145,11 +144,10 @@ func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
 	info.Msg(email)
 	info.Msg(key)
 
-
 	sort.Strings(li)
 	log.Info().Msgf("%s", li)
-	info.Uint8("network",network).End()
-	println("txt set len(li)",len(li))
+	info.Uint8("network", network).End()
+	println("txt set len(li)", len(li))
 
 	addrLi := make([]*net.UDPAddr, len(li))
 	var err error
@@ -163,8 +161,6 @@ func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
 
 	log.Print(ipv4Sign)
 	log.Printf("sign len %d", len(ipv4Sign))
-
-
 
 	api, err := cloudflare.New(key, email)
 	ex.Panic(err)
