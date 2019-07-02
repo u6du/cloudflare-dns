@@ -57,27 +57,6 @@ func ipLiSign(bit int) func([]*net.UDPAddr, *ed25519.PrivateKey) string {
 		copy(buf[0:ed25519.SignatureSize], ed25519.Sign(*private, buf[ed25519.SignatureSize:]))
 		info.Msgf("%x", buf)
 
-		/*
-			var out bytes.Buffer
-			w, err := lzma.Writer2Config{DictCap:64 * 1024 * 1024}.NewWriter2(&out)
-			// compress text
-			if err != nil {
-				fmt.Printf("xz.NewWriter error %s", err)
-			}
-			if _, err := io.Copy(w, bytes.NewReader(buf)); err != nil {
-				fmt.Printf("WriteString error %s", err)
-			}
-			if err := w.Close(); err != nil {
-				fmt.Printf("w.Close error %s", err)
-			}
-
-			log.Printf("%x", out.Bytes())
-
-			log.Printf("buf len %d",len(buf))
-
-			log.Printf("out.Bytes() len %d",len(out.Bytes()))
-		*/
-
 		return base85.EncodeToString(buf)
 	}
 }
@@ -88,9 +67,9 @@ var IpLiSign = map[uint8]func([]*net.UDPAddr, *ed25519.PrivateKey) string{
 }
 
 func main() {
-	filename := "cloudflare/6du.sign.private"
+	filename := Root+"/6du.sign.private"
 	privateByte := config.File.Byte(filename, func() []byte {
-		panic(errors.New(config.File.Path(filename)+" no exist"))
+		panic(errors.New(config.File.Path(filename) + " no exist"))
 		return nil
 	})
 	private := ed25519.NewKeyFromSeed(privateByte)
@@ -131,8 +110,10 @@ func main() {
 	})
 }
 
+var Root = "cloudflare"
+
 func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
-	filename := "cloudflare"
+	filename := Root
 	emailKey := config.File.Li(filename, []string{})
 
 	if len(emailKey) != 2 {
@@ -198,3 +179,24 @@ func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
 		}
 	}
 }
+
+/*
+	var out bytes.Buffer
+	w, err := lzma.Writer2Config{DictCap:64 * 1024 * 1024}.NewWriter2(&out)
+	// compress text
+	if err != nil {
+		fmt.Printf("xz.NewWriter error %s", err)
+	}
+	if _, err := io.Copy(w, bytes.NewReader(buf)); err != nil {
+		fmt.Printf("WriteString error %s", err)
+	}
+	if err := w.Close(); err != nil {
+		fmt.Printf("w.Close error %s", err)
+	}
+
+	log.Printf("%x", out.Bytes())
+
+	log.Printf("buf len %d",len(buf))
+
+	log.Printf("out.Bytes() len %d",len(out.Bytes()))
+*/
