@@ -67,7 +67,7 @@ var IpLiSign = map[uint8]func([]*net.UDPAddr, *ed25519.PrivateKey) string{
 }
 
 func main() {
-	filename := Root + "/6du.dns.private"
+	filename := Root + "/6du.private"
 	privateByte := config.File.Byte(filename, func() []byte {
 		panic(errors.New(config.File.Path(filename) + " no exist"))
 		return nil
