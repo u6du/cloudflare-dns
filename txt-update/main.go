@@ -114,11 +114,11 @@ func main() {
 var Root = "cloudflare"
 
 func TxtSet(private *ed25519.PrivateKey, network uint8, li []string) {
-	filename := path.Join(Root, "api.li")
+	filename := path.Join(Root, "api")
 	emailKey := config.File.Li(filename, []string{})
 
 	if len(emailKey) != 2 {
-		panic(errors.New(config.File.Path(filename) + " is empty , please write email and key one a line"))
+		panic(errors.New(config.File.Path(filename+".li") + " is empty , please write email and key one a line"))
 	}
 
 	email := emailKey[0]
